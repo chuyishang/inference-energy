@@ -1,0 +1,8 @@
+{
+  "duration_s": 329.99701380729675,
+  "idle_power_W": 19.69316136236739,
+  "total_energy_J": 106465.76072604148,
+  "active_energy_J": 99967.076284035,
+  "total_completion_tokens": 121826,
+  "energy_per_completion_token_J": 0.8205725894639486
+}
