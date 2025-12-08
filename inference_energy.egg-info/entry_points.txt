@@ -1,0 +1,2 @@
+[console_scripts]
+inference-energy = inference_energy.cli:main

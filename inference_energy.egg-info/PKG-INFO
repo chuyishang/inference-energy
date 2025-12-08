@@ -1,3 +1,12 @@
+Metadata-Version: 2.4
+Name: inference-energy
+Version: 0.1.0
+Summary: Add your description here
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: httpx>=0.27.0
+Requires-Dist: pynvml>=11.5.0
+
 # Inference Energy Toolkit
 
 Measure the environmental impact of running inference on machine learning models, with a concrete vLLM-oriented protocol and utilities that emphasize reproducibility and realistic serving conditions.

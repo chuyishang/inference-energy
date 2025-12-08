@@ -1,0 +1,8 @@
+export CUDA_VISIBLE_DEVICES=3
+
+uv run python3 -m vllm.entrypoints.openai.api_server \
+--model qwen/Qwen2.5-3B-Instruct \
+--gpu-memory-utilization 0.9 \
+--max-num-seqs 128 \
+--tensor-parallel-size 1 \
+--port 8000
