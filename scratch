@@ -6,3 +6,97 @@ uv run python3 -m vllm.entrypoints.openai.api_server \
 --max-num-seqs 128 \
 --tensor-parallel-size 1 \
 --port 8000
+
+
+uv run python run_measurement.py --endpoint http://localhost:8000 --model qwen/Qwen2.5-3B-Instruct
+
+
+uv run python run_measurement.py \
+    --endpoint http://localhost:8000 \
+    --model qwen/Qwen2.5-3B-Instruct \
+    --gpu 3 \
+    --idle-duration 180 \
+    --measurement-duration 300 \
+    --concurrency 8
+
+
+shang@d1:~/inference-energy$ uv run python run_measurement.py \
+    --endpoint http://localhost:8000 \
+    --model qwen/Qwen2.5-3B-Instruct \
+    --gpu 3 \
+    --idle-duration 180 \
+    --measurement-duration 300 \
+    --concurrency 8
+
+============================================================
+STEP 1: Measuring idle baseline power
+============================================================
+Please ensure vLLM is NOT running on GPU 3
+Press Enter when ready to start idle measurement...
+
+============================================================
+Measuring idle power for 180s
+============================================================
+Running: inference-energy log-power --duration 180 --interval 0.1 --device-index 3 --output logs/idle.csv
+
+/home/shang/inference-energy/inference_energy/power_logging.py:27: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore
+
+Idle power: 19.69 W
+
+============================================================
+STEP 2: Warmup phase
+============================================================
+Please ensure vLLM is running at http://localhost:8000
+Press Enter when vLLM is ready...
+
+============================================================
+Warming up for 180s
+============================================================
+Running: inference-energy load-test --endpoint http://localhost:8000 --model qwen/Qwen2.5-3B-Instruct --random-prompts --duration 180 --concurrency 4 --output logs/warmup_requests.csv
+
+
+Warmup complete. Starting actual measurement in 5 seconds...
+
+============================================================
+STEP 3: Active measurement
+============================================================
+Starting power logging for 330s (includes buffer)...
+/home/shang/inference-energy/inference_energy/power_logging.py:27: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore
+Starting load test for 300s with concurrency 8...
+Load test complete. Waiting for power logging to finish...
+Power logging complete.
+
+============================================================
+STEP 4: Analysis
+============================================================
+
+============================================================
+Analyzing results
+============================================================
+Running: inference-energy analyze --power-log logs/active.csv --requests-log logs/requests.csv --idle-power 19.69316136236739 --output logs/summary.json
+
+{
+  "duration_s": 329.99701380729675,
+  "idle_power_W": 19.69316136236739,
+  "total_energy_J": 106465.76072604148,
+  "active_energy_J": 99967.076284035,
+  "total_completion_tokens": 121826,
+  "energy_per_completion_token_J": 0.8205725894639486
+}
+
+============================================================
+MEASUREMENT COMPLETE
+============================================================
+
+Results saved to: logs/
+
+Key metrics:
+  Idle power:                19.69 W
+  Total energy:              106465.76 J
+  Active energy:             99967.08 J
+  Completion tokens:         121,826
+  Energy per token:          0.8206 J/token
+  Energy per 1K tokens:      820.57 J/1K tokens
+  Active energy (kWh):       0.027769 kWh
