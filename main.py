@@ -1,6 +1,5 @@
-def main():
-    print("Hello from inference-energy!")
+from inference_energy.cli import main
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
