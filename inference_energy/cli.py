@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 from typing import Sequence
 
-from inference_energy.analysis import summarize
+from inference_energy.analysis import analyze_comprehensive, summarize
 from inference_energy.load_generator import LoadGenConfig, run_load_test
 from inference_energy.power_logging import log_gpu_power
 
@@ -72,6 +72,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     analyze_parser.add_argument("--requests-log", type=Path, required=True, help="CSV file from load-test")
     analyze_parser.add_argument("--idle-power", type=float, default=0.0, help="Idle power to subtract (W)")
     analyze_parser.add_argument("--output", type=Path, help="Optional JSON output file for the summary")
+    analyze_parser.add_argument(
+        "--comprehensive",
+        action="store_true",
+        help="Generate comprehensive metrics (M1-M10, D1-D4)",
+    )
+    analyze_parser.add_argument("--model-size-gb", type=float, help="Model size in GB (for D4 calculation)")
+    analyze_parser.add_argument(
+        "--gpu-memory-bw-gbs", type=float, help="Theoretical GPU memory bandwidth in GB/s (for D4)"
+    )
+    analyze_parser.add_argument("--flops", type=float, help="Measured FLOPs from profiler (for M10/D3)")
 
     args = parser.parse_args(argv)
 
@@ -106,20 +116,61 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if args.command == "analyze":
-        energy, tokens = summarize(
-            power_log=args.power_log,
-            requests_log=args.requests_log,
-            idle_power_w=args.idle_power,
-        )
+        if args.comprehensive:
+            # Use comprehensive metrics
+            model_size_bytes = int(args.model_size_gb * 1024**3) if args.model_size_gb else None
+            gpu_memory_bw = args.gpu_memory_bw_gbs * 1024**3 if args.gpu_memory_bw_gbs else None
 
-        summary = {
-            "duration_s": energy.duration_s,
-            "idle_power_W": energy.idle_power_w,
-            "total_energy_J": energy.total_energy_j,
-            "active_energy_J": energy.active_energy_j,
-            "total_completion_tokens": tokens.total_completion_tokens,
-            "energy_per_completion_token_J": tokens.energy_per_completion_token_j,
-        }
+            metrics = analyze_comprehensive(
+                power_log=args.power_log,
+                requests_log=args.requests_log,
+                idle_power_w=args.idle_power,
+                model_size_bytes=model_size_bytes,
+                gpu_memory_bw_bytes_per_s=gpu_memory_bw,
+                flops_measured=args.flops,
+            )
+
+            summary = {
+                # Primary measurements (M1-M10)
+                "M1_total_energy_J": metrics.m1_total_energy_j,
+                "M2_total_tokens": metrics.m2_total_tokens,
+                "M3_total_time_s": metrics.m3_total_time_s,
+                "M4_avg_prefill_time_s": metrics.m4_avg_prefill_time_s,
+                "M5_avg_decode_time_per_token_s": metrics.m5_avg_decode_time_per_token_s,
+                "M6_avg_power_W": metrics.m6_avg_power_w,
+                "M7_peak_power_W": metrics.m7_peak_power_w,
+                "M8_avg_gpu_util_percent": metrics.m8_avg_gpu_util_percent,
+                "M9_avg_mem_util_percent": metrics.m9_avg_mem_util_percent,
+                "M10_flops_measured": metrics.m10_flops_measured,
+                # Derived metrics (D1-D4)
+                "D1_energy_per_token_J": metrics.d1_energy_per_token_j,
+                "D2_throughput_tokens_per_s": metrics.d2_throughput_tokens_per_s,
+                "D3_power_efficiency_flops_per_W": metrics.d3_power_efficiency_flops_per_w,
+                "D4_memory_bandwidth_util_percent": metrics.d4_memory_bandwidth_util_percent,
+                # Additional context
+                "idle_power_W": metrics.idle_power_w,
+                "active_energy_J": metrics.active_energy_j,
+                "total_requests": metrics.total_requests,
+                "successful_requests": metrics.successful_requests,
+                "avg_latency_s": metrics.avg_latency_s,
+                "mem_total_GB": metrics.mem_total_gb,
+            }
+        else:
+            # Legacy analysis
+            energy, tokens = summarize(
+                power_log=args.power_log,
+                requests_log=args.requests_log,
+                idle_power_w=args.idle_power,
+            )
+
+            summary = {
+                "duration_s": energy.duration_s,
+                "idle_power_W": energy.idle_power_w,
+                "total_energy_J": energy.total_energy_j,
+                "active_energy_J": energy.active_energy_j,
+                "total_completion_tokens": tokens.total_completion_tokens,
+                "energy_per_completion_token_J": tokens.energy_per_completion_token_j,
+            }
 
         print(json.dumps(summary, indent=2))
         if args.output:

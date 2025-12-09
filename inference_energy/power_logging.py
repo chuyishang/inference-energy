@@ -17,6 +17,7 @@ class PowerSample:
     power_w: float
     gpu_util_percent: int
     mem_used_bytes: int
+    mem_total_bytes: int
 
 
 class GpuPowerLogger:
@@ -44,6 +45,7 @@ class GpuPowerLogger:
             power_w=power_w,
             gpu_util_percent=util.gpu,
             mem_used_bytes=mem.used,
+            mem_total_bytes=mem.total,
         )
 
     def record(
@@ -62,13 +64,13 @@ class GpuPowerLogger:
 
         with output_path.open("w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["timestamp_s", "power_W", "gpu_util_percent", "mem_used_bytes"])
+            writer.writerow(["timestamp_s", "power_W", "gpu_util_percent", "mem_used_bytes", "mem_total_bytes"])
 
             while time.time() < end_time:
                 sample = self.sample()
                 samples.append(sample)
                 writer.writerow(
-                    [sample.timestamp_s, sample.power_w, sample.gpu_util_percent, sample.mem_used_bytes]
+                    [sample.timestamp_s, sample.power_w, sample.gpu_util_percent, sample.mem_used_bytes, sample.mem_total_bytes]
                 )
                 time.sleep(interval_s)
 

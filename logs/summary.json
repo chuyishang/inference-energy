@@ -1,8 +1,22 @@
 {
-  "duration_s": 329.99701380729675,
-  "idle_power_W": 19.69316136236739,
-  "total_energy_J": 106465.76072604148,
-  "active_energy_J": 99967.076284035,
-  "total_completion_tokens": 121826,
-  "energy_per_completion_token_J": 0.8205725894639486
+  "M1_total_energy_J": 212340.9954298465,
+  "M2_total_tokens": 118615,
+  "M3_total_time_s": 629.964506149292,
+  "M4_avg_prefill_time_s": 0.8177359932539414,
+  "M5_avg_decode_time_per_token_s": 0.03242954189829735,
+  "M6_avg_power_W": 337.0321092356688,
+  "M7_peak_power_W": 350.193,
+  "M8_avg_gpu_util_percent": 93.48328025477707,
+  "M9_avg_mem_util_percent": 93.21670532226562,
+  "M10_flops_measured": null,
+  "D1_energy_per_token_J": 1.7901698388049276,
+  "D2_throughput_tokens_per_s": 188.288385841043,
+  "D3_power_efficiency_flops_per_W": null,
+  "D4_memory_bandwidth_util_percent": 46.122344263056824,
+  "idle_power_W": 20.76969364548495,
+  "active_energy_J": 199256.82562959648,
+  "total_requests": 1176,
+  "successful_requests": 1176,
+  "avg_latency_s": 4.088679966269707,
+  "mem_total_GB": 24.0
 }

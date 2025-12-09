@@ -1,11 +1,18 @@
-export CUDA_VISIBLE_DEVICES=3
-
+export CUDA_VISIBLE_DEVICES=1
 uv run python3 -m vllm.entrypoints.openai.api_server \
---model qwen/Qwen2.5-3B-Instruct \
+--model qwen/Qwen2.5-7B-Instruct \
 --gpu-memory-utilization 0.9 \
 --max-num-seqs 128 \
 --tensor-parallel-size 1 \
 --port 8000
+
+
+uv run python run_measurement.py \
+    --endpoint http://localhost:8000 \
+    --model qwen/Qwen2.5-7B-Instruct \
+    --gpu 1 \
+    --model-size-gb 14.0 \
+    --gpu-memory-bw-gbs 936
 
 
 uv run python run_measurement.py --endpoint http://localhost:8000 --model qwen/Qwen2.5-3B-Instruct
@@ -13,11 +20,13 @@ uv run python run_measurement.py --endpoint http://localhost:8000 --model qwen/Q
 
 uv run python run_measurement.py \
     --endpoint http://localhost:8000 \
-    --model qwen/Qwen2.5-3B-Instruct \
+    --model qwen/Qwen2.5-7B-Instruct \
     --gpu 3 \
     --idle-duration 180 \
     --measurement-duration 300 \
     --concurrency 8
+    --skip-idle \
+    --idle-power 45.0 \
 
 
 shang@d1:~/inference-energy$ uv run python run_measurement.py \
@@ -68,6 +77,14 @@ Starting load test for 300s with concurrency 8...
 Load test complete. Waiting for power logging to finish...
 Power logging complete.
 
+
+
+
+
+
+
+
+Qwen2.5-3B-Instruct
 ============================================================
 STEP 4: Analysis
 ============================================================
@@ -100,3 +117,157 @@ Key metrics:
   Energy per token:          0.8206 J/token
   Energy per 1K tokens:      820.57 J/1K tokens
   Active energy (kWh):       0.027769 kWh
+
+
+
+Qwen2.5-3B-Instruct
+============================================================
+STEP 4: Analysis
+============================================================
+
+============================================================
+Analyzing results
+============================================================
+Running: inference-energy analyze --power-log logs/active.csv --requests-log logs/requests.csv --idle-power 20.704314381270905 --comprehensive --output logs/summary.json --model-size-gb 12.0 --gpu-memory-bw-gbs 936.0
+
+{
+  "M1_total_energy_J": 209975.35370013022,
+  "M2_total_tokens": 250166,
+  "M3_total_time_s": 629.9984521865845,
+  "M4_avg_prefill_time_s": 0.4836977881847432,
+  "M5_avg_decode_time_per_token_s": 0.015359782022095729,
+  "M6_avg_power_W": 333.2561670382166,
+  "M7_peak_power_W": 348.916,
+  "M8_avg_gpu_util_percent": 90.93566878980891,
+  "M9_avg_mem_util_percent": 93.4282938639323,
+  "M10_flops_measured": null,
+  "D1_energy_per_token_J": 0.8393440903245454,
+  "D2_throughput_tokens_per_s": 397.0898644778086,
+  "D3_power_efficiency_flops_per_W": null,
+  "D4_memory_bandwidth_util_percent": 509.08956984334435,
+  "idle_power_W": 20.704314381270905,
+  "active_energy_J": 196931.6676863451,
+  "total_requests": 1986,
+  "successful_requests": 1986,
+  "avg_latency_s": 2.418488940923716,
+  "mem_total_GB": 24.0
+}
+
+============================================================
+MEASUREMENT COMPLETE
+============================================================
+
+Results saved to: logs/
+
+============================================================
+PRIMARY MEASUREMENTS (M1-M10)
+============================================================
+M1  Total energy:              209975.35 J (0.058326 kWh)
+M2  Total tokens:              250,166
+M3  Total time:                630.00 s (10.50 min)
+M4  Avg prefill time:          0.4837 s (estimated)
+M5  Avg decode time/token:     0.0154 s (estimated)
+M6  Average power:             333.26 W
+M7  Peak power:                348.92 W
+M8  Avg GPU utilization:       90.9%
+M9  Avg memory utilization:    93.4%
+M10 FLOPs measured:            N/A
+
+============================================================
+DERIVED METRICS (D1-D4)
+============================================================
+D1  Energy per token:          0.8393 J/token
+                               839.34 J/1K tokens
+D2  Throughput:                397.09 tokens/s
+D3  Power efficiency:          N/A (need --flops)
+D4  Memory bandwidth util:     509.1%
+
+============================================================
+ADDITIONAL CONTEXT
+============================================================
+Idle power:                    20.70 W
+Active energy:                 196931.67 J (0.054703 kWh)
+Total requests:                1,986
+Successful requests:           1,986
+Average latency:               2.418 s
+GPU memory total:              24.00 GB
+
+============================================================
+
+
+
+
+
+Qwen2.5-7B-Instruct
+============================================================
+STEP 4: Analysis
+============================================================
+
+============================================================
+Analyzing results
+============================================================
+Running: inference-energy analyze --power-log logs/active.csv --requests-log logs/requests.csv --idle-power 20.76969364548495 --comprehensive --output logs/summary.json --model-size-gb 14.0 --gpu-memory-bw-gbs 936.0
+
+{
+  "M1_total_energy_J": 212340.9954298465,
+  "M2_total_tokens": 118615,
+  "M3_total_time_s": 629.964506149292,
+  "M4_avg_prefill_time_s": 0.8177359932539414,
+  "M5_avg_decode_time_per_token_s": 0.03242954189829735,
+  "M6_avg_power_W": 337.0321092356688,
+  "M7_peak_power_W": 350.193,
+  "M8_avg_gpu_util_percent": 93.48328025477707,
+  "M9_avg_mem_util_percent": 93.21670532226562,
+  "M10_flops_measured": null,
+  "D1_energy_per_token_J": 1.7901698388049276,
+  "D2_throughput_tokens_per_s": 188.288385841043,
+  "D3_power_efficiency_flops_per_W": null,
+  "D4_memory_bandwidth_util_percent": 46.122344263056824,
+  "idle_power_W": 20.76969364548495,
+  "active_energy_J": 199256.82562959648,
+  "total_requests": 1176,
+  "successful_requests": 1176,
+  "avg_latency_s": 4.088679966269707,
+  "mem_total_GB": 24.0
+}
+
+============================================================
+MEASUREMENT COMPLETE
+============================================================
+
+Results saved to: logs/
+
+============================================================
+PRIMARY MEASUREMENTS (M1-M10)
+============================================================
+M1  Total energy:              212341.00 J (0.058984 kWh)
+M2  Total tokens:              118,615
+M3  Total time:                629.96 s (10.50 min)
+M4  Avg prefill time:          0.8177 s (estimated)
+M5  Avg decode time/token:     0.0324 s (estimated)
+M6  Average power:             337.03 W
+M7  Peak power:                350.19 W
+M8  Avg GPU utilization:       93.5%
+M9  Avg memory utilization:    93.2%
+M10 FLOPs measured:            N/A
+
+============================================================
+DERIVED METRICS (D1-D4)
+============================================================
+D1  Energy per token:          1.7902 J/token
+                               1790.17 J/1K tokens
+D2  Throughput:                188.29 tokens/s
+D3  Power efficiency:          N/A (need --flops)
+D4  Memory bandwidth util:     46.1%
+
+============================================================
+ADDITIONAL CONTEXT
+============================================================
+Idle power:                    20.77 W
+Active energy:                 199256.83 J (0.055349 kWh)
+Total requests:                1,176
+Successful requests:           1,176
+Average latency:               4.089 s
+GPU memory total:              24.00 GB
+
+============================================================

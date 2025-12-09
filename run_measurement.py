@@ -66,6 +66,11 @@ This will:
         "--skip-idle", action="store_true", help="Skip idle measurement and provide --idle-power manually"
     )
     parser.add_argument("--idle-power", type=float, help="Manually specified idle power in W (requires --skip-idle)")
+    parser.add_argument("--model-size-gb", type=float, help="Model size in GB (for D4 calculation)")
+    parser.add_argument(
+        "--gpu-memory-bw-gbs", type=float, help="Theoretical GPU memory bandwidth in GB/s (for D4)"
+    )
+    parser.add_argument("--flops", type=float, help="Measured FLOPs from profiler (for M10/D3)")
 
     args = parser.parse_args()
 
@@ -196,21 +201,28 @@ This will:
     print("="*60)
 
     summary_path = args.output_dir / "summary.json"
-    run_command(
-        [
-            "inference-energy",
-            "analyze",
-            "--power-log",
-            str(active_log),
-            "--requests-log",
-            str(requests_log),
-            "--idle-power",
-            str(idle_power_w),
-            "--output",
-            str(summary_path),
-        ],
-        "Analyzing results",
-    )
+    analyze_cmd = [
+        "inference-energy",
+        "analyze",
+        "--power-log",
+        str(active_log),
+        "--requests-log",
+        str(requests_log),
+        "--idle-power",
+        str(idle_power_w),
+        "--comprehensive",
+        "--output",
+        str(summary_path),
+    ]
+
+    if args.model_size_gb:
+        analyze_cmd.extend(["--model-size-gb", str(args.model_size_gb)])
+    if args.gpu_memory_bw_gbs:
+        analyze_cmd.extend(["--gpu-memory-bw-gbs", str(args.gpu_memory_bw_gbs)])
+    if args.flops:
+        analyze_cmd.extend(["--flops", str(args.flops)])
+
+    run_command(analyze_cmd, "Analyzing results")
 
     # Print summary
     with summary_path.open() as f:
@@ -220,17 +232,43 @@ This will:
     print("MEASUREMENT COMPLETE")
     print("="*60)
     print(f"\nResults saved to: {args.output_dir}/")
-    print(f"\nKey metrics:")
-    print(f"  Idle power:                {summary['idle_power_W']:.2f} W")
-    print(f"  Total energy:              {summary['total_energy_J']:.2f} J")
-    print(f"  Active energy:             {summary['active_energy_J']:.2f} J")
-    print(f"  Completion tokens:         {summary['total_completion_tokens']:,}")
-    print(f"  Energy per token:          {summary['energy_per_completion_token_J']:.4f} J/token")
-    print(f"  Energy per 1K tokens:      {summary['energy_per_completion_token_J'] * 1000:.2f} J/1K tokens")
 
-    # Additional useful metrics
-    energy_kwh = summary['active_energy_J'] / 3600000
-    print(f"  Active energy (kWh):       {energy_kwh:.6f} kWh")
+    # Display comprehensive metrics
+    print("\n" + "="*60)
+    print("PRIMARY MEASUREMENTS (M1-M10)")
+    print("="*60)
+    print(f"M1  Total energy:              {summary['M1_total_energy_J']:.2f} J ({summary['M1_total_energy_J']/3600000:.6f} kWh)")
+    print(f"M2  Total tokens:              {summary['M2_total_tokens']:,}")
+    print(f"M3  Total time:                {summary['M3_total_time_s']:.2f} s ({summary['M3_total_time_s']/60:.2f} min)")
+    print(f"M4  Avg prefill time:          {summary['M4_avg_prefill_time_s']:.4f} s (estimated)")
+    print(f"M5  Avg decode time/token:     {summary['M5_avg_decode_time_per_token_s']:.4f} s (estimated)")
+    print(f"M6  Average power:             {summary['M6_avg_power_W']:.2f} W")
+    print(f"M7  Peak power:                {summary['M7_peak_power_W']:.2f} W")
+    print(f"M8  Avg GPU utilization:       {summary['M8_avg_gpu_util_percent']:.1f}%")
+    print(f"M9  Avg memory utilization:    {summary['M9_avg_mem_util_percent']:.1f}%")
+    m10_str = f"{summary['M10_flops_measured']:.2e}" if summary['M10_flops_measured'] else "N/A"
+    print(f"M10 FLOPs measured:            {m10_str}")
+
+    print("\n" + "="*60)
+    print("DERIVED METRICS (D1-D4)")
+    print("="*60)
+    print(f"D1  Energy per token:          {summary['D1_energy_per_token_J']:.4f} J/token")
+    print(f"                               {summary['D1_energy_per_token_J']*1000:.2f} J/1K tokens")
+    print(f"D2  Throughput:                {summary['D2_throughput_tokens_per_s']:.2f} tokens/s")
+    d3_str = f"{summary['D3_power_efficiency_flops_per_W']:.2e} FLOPs/W" if summary['D3_power_efficiency_flops_per_W'] else "N/A (need --flops)"
+    print(f"D3  Power efficiency:          {d3_str}")
+    d4_str = f"{summary['D4_memory_bandwidth_util_percent']:.1f}%" if summary['D4_memory_bandwidth_util_percent'] else "N/A (need --model-size-gb and --gpu-memory-bw-gbs)"
+    print(f"D4  Memory bandwidth util:     {d4_str}")
+
+    print("\n" + "="*60)
+    print("ADDITIONAL CONTEXT")
+    print("="*60)
+    print(f"Idle power:                    {summary['idle_power_W']:.2f} W")
+    print(f"Active energy:                 {summary['active_energy_J']:.2f} J ({summary['active_energy_J']/3600000:.6f} kWh)")
+    print(f"Total requests:                {summary['total_requests']:,}")
+    print(f"Successful requests:           {summary['successful_requests']:,}")
+    print(f"Average latency:               {summary['avg_latency_s']:.3f} s")
+    print(f"GPU memory total:              {summary['mem_total_GB']:.2f} GB")
 
     print("\n" + "="*60)
 
