@@ -5,9 +5,11 @@ import argparse
 import asyncio
 import csv
 import json
+import re
 import subprocess
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 
 
@@ -31,6 +33,15 @@ def run_command(cmd: list[str], description: str) -> None:
     if result.returncode != 0:
         print(f"\nError: {description} failed with exit code {result.returncode}")
         sys.exit(1)
+
+
+def sanitize_model_name(model_name: str) -> str:
+    """Convert model name to filesystem-safe string."""
+    # Replace slashes and other special chars with underscores
+    sanitized = re.sub(r'[/\\:*?"<>|]', '_', model_name)
+    # Remove leading/trailing underscores and dots
+    sanitized = sanitized.strip('._')
+    return sanitized
 
 
 def main():
@@ -61,7 +72,7 @@ This will:
         "--measurement-duration", type=int, default=600, help="Active measurement duration in seconds (default: 600)"
     )
     parser.add_argument("--concurrency", type=int, default=8, help="Number of concurrent clients (default: 8)")
-    parser.add_argument("--output-dir", type=Path, default=Path("logs"), help="Output directory (default: logs)")
+    parser.add_argument("--output-dir", type=Path, help="Output directory (default: results/<model>_<timestamp>)")
     parser.add_argument(
         "--skip-idle", action="store_true", help="Skip idle measurement and provide --idle-power manually"
     )
@@ -76,6 +87,12 @@ This will:
 
     if args.skip_idle and args.idle_power is None:
         parser.error("--skip-idle requires --idle-power to be specified")
+
+    # Create output directory based on model name if not specified
+    if args.output_dir is None:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        model_name_safe = sanitize_model_name(args.model)
+        args.output_dir = Path("results") / f"{model_name_safe}_{timestamp}"
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
 

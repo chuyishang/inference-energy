@@ -1,0 +1,199 @@
+########################################################
+# DGX4
+########################################################
+export CUDA_VISIBLE_DEVICES=0
+uv run python3 -m vllm.entrypoints.openai.api_server \
+--model qwen/Qwen2.5-3B-Instruct \
+--gpu-memory-utilization 0.9 \
+--max-num-seqs 128 \
+--tensor-parallel-size 1 \
+--dtype bfloat16 \
+--port 8000
+
+uv run python run_measurement.py \
+    --endpoint http://localhost:8000 \
+    --model qwen/Qwen2.5-3B-Instruct \
+    --gpu 0 \
+    --model-size-gb 6.0 \
+    --gpu-memory-bw-gbs 2039
+
+
+export CUDA_VISIBLE_DEVICES=1
+uv run python3 -m vllm.entrypoints.openai.api_server \
+--model qwen/Qwen2.5-7B-Instruct \
+--gpu-memory-utilization 0.9 \
+--max-num-seqs 128 \
+--tensor-parallel-size 1 \
+--dtype bfloat16 \
+--port 8001
+
+uv run python run_measurement.py \
+    --endpoint http://localhost:8001 \
+    --model qwen/Qwen2.5-7B-Instruct \
+    --gpu 1 \
+    --model-size-gb 14.0 \
+    --gpu-memory-bw-gbs 2039
+
+
+export CUDA_VISIBLE_DEVICES=2
+uv run python3 -m vllm.entrypoints.openai.api_server \
+--model meta-llama/Meta-Llama-3-8B-Instruct \
+--gpu-memory-utilization 0.9 \
+--max-num-seqs 128 \
+--tensor-parallel-size 1 \
+--dtype bfloat16 \
+--port 8002
+
+uv run python run_measurement.py \
+    --endpoint http://localhost:8002 \
+    --model meta-llama/Meta-Llama-3-8B-Instruct \
+    --gpu 2 \
+    --model-size-gb 16.0 \
+    --gpu-memory-bw-gbs 2039
+
+
+export CUDA_VISIBLE_DEVICES=0
+uv run python3 -m vllm.entrypoints.openai.api_server \
+--model openai/gpt-oss-20b \
+--gpu-memory-utilization 0.9 \
+--max-num-seqs 128 \
+--tensor-parallel-size 1 \
+--dtype bfloat16 \
+--port 8000
+
+uv run python run_measurement.py \
+    --endpoint http://localhost:8000 \
+    --model openai/gpt-oss-20b \
+    --gpu 0 \
+    --model-size-gb 40.0 \
+    --gpu-memory-bw-gbs 2039
+
+
+
+########################################################
+### D4
+########################################################
+export CUDA_VISIBLE_DEVICES=0
+uv run python3 -m vllm.entrypoints.openai.api_server \
+--model qwen/Qwen2.5-3B-Instruct \
+--gpu-memory-utilization 0.9 \
+--max-num-seqs 128 \
+--tensor-parallel-size 1 \
+--dtype bfloat16 \
+--port 8000
+
+uv run python run_measurement.py \
+    --endpoint http://localhost:8000 \
+    --model qwen/Qwen2.5-3B-Instruct \
+    --gpu 0 \
+    --model-size-gb 6.0 \
+    --gpu-memory-bw-gbs 960
+
+
+export CUDA_VISIBLE_DEVICES=1
+uv run python3 -m vllm.entrypoints.openai.api_server \
+--model qwen/Qwen2.5-7B-Instruct \
+--gpu-memory-utilization 0.9 \
+--max-num-seqs 128 \
+--tensor-parallel-size 1 \
+--dtype bfloat16 \
+--port 8001
+
+uv run python run_measurement.py \
+    --endpoint http://localhost:8001 \
+    --model qwen/Qwen2.5-7B-Instruct \
+    --gpu 1 \
+    --model-size-gb 14.0 \
+    --gpu-memory-bw-gbs 960
+
+
+export CUDA_VISIBLE_DEVICES=0
+uv run python3 -m vllm.entrypoints.openai.api_server \
+--model meta-llama/Meta-Llama-3-8B-Instruct \
+--gpu-memory-utilization 0.9 \
+--max-num-seqs 128 \
+--tensor-parallel-size 1 \
+--dtype bfloat16 \
+--port 8002
+
+uv run python run_measurement.py \
+    --endpoint http://localhost:8002 \
+    --model meta-llama/Meta-Llama-3-8B-Instruct \
+    --gpu 0 \
+    --model-size-gb 16.0 \
+    --gpu-memory-bw-gbs 960
+
+
+export CUDA_VISIBLE_DEVICES=0
+uv run python3 -m vllm.entrypoints.openai.api_server \
+--model openai/gpt-oss-20b \
+--gpu-memory-utilization 0.9 \
+--max-num-seqs 128 \
+--tensor-parallel-size 1 \
+--dtype bfloat16 \
+--port 8000
+
+uv run python run_measurement.py \
+    --endpoint http://localhost:8000 \
+    --model openai/gpt-oss-20b \
+    --gpu 0 \
+    --model-size-gb 40.0 \
+    --gpu-memory-bw-gbs 960
+
+
+
+
+
+### D1 
+
+export CUDA_VISIBLE_DEVICES=7
+uv run python3 -m vllm.entrypoints.openai.api_server \
+--model qwen/Qwen2.5-3B-Instruct \
+--gpu-memory-utilization 0.9 \
+--max-num-seqs 128 \
+--tensor-parallel-size 1 \
+--dtype bfloat16 \
+--port 8000
+
+uv run python run_measurement.py \
+    --endpoint http://localhost:8000 \
+    --model qwen/Qwen2.5-3B-Instruct \
+    --gpu 7 \
+    --model-size-gb 6.0 \
+    --gpu-memory-bw-gbs 936
+
+
+
+export CUDA_VISIBLE_DEVICES=8
+uv run python3 -m vllm.entrypoints.openai.api_server \
+--model qwen/Qwen2.5-7B-Instruct \
+--gpu-memory-utilization 0.9 \
+--max-num-seqs 128 \
+--tensor-parallel-size 1 \
+--dtype bfloat16 \
+--port 8001
+
+uv run python run_measurement.py \
+    --endpoint http://localhost:8001 \
+    --model qwen/Qwen2.5-7B-Instruct \
+    --gpu 8 \
+    --model-size-gb 14.0 \
+    --gpu-memory-bw-gbs 936
+
+
+export CUDA_VISIBLE_DEVICES=9
+uv run python3 -m vllm.entrypoints.openai.api_server \
+--model meta-llama/Meta-Llama-3-8B-Instruct \
+--gpu-memory-utilization 0.9 \
+--max-num-seqs 128 \
+--tensor-parallel-size 1 \
+--dtype bfloat16 \
+--port 8002
+
+uv run python run_measurement.py \
+    --endpoint http://localhost:8002 \
+    --model meta-llama/Meta-Llama-3-8B-Instruct \
+    --gpu 9 \
+    --model-size-gb 16.0 \
+    --gpu-memory-bw-gbs 936
+
