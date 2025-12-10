@@ -132,39 +132,39 @@ GPU memory total:              80.00 GB
 MEASUREMENT COMPLETE
 ============================================================
 
-Results saved to: results/openai_gpt-oss-20b_20251210_040524/
+Results saved to: results/openai_gpt-oss-20b_20251210_051539/
 
 ============================================================
 PRIMARY MEASUREMENTS (M1-M10)
 ============================================================
-M1  Total energy:              38877.71 J (0.010799 kWh)
-M2  Total tokens:              508,705
-M3  Total time:                629.99 s (10.50 min)
-M4  Avg prefill time:          0.4518 s (estimated)
-M5  Avg decode time/token:     0.0076 s (estimated)
-M6  Average power:             61.71 W
-M7  Peak power:                62.08 W
-M8  Avg GPU utilization:       0.0%
-M9  Avg memory utilization:    1.0%
+M1  Total energy:              200800.56 J (0.055778 kWh)
+M2  Total tokens:              509,949
+M3  Total time:                629.98 s (10.50 min)
+M4  Avg prefill time:          0.4472 s (estimated)
+M5  Avg decode time/token:     0.0075 s (estimated)
+M6  Average power:             318.71 W
+M7  Peak power:                402.90 W
+M8  Avg GPU utilization:       88.1%
+M9  Avg memory utilization:    92.0%
 M10 FLOPs measured:            N/A
 
 ============================================================
 DERIVED METRICS (D1-D4)
 ============================================================
-D1  Energy per token:          0.0764 J/token
-                               76.42 J/1K tokens
-D2  Throughput:                807.48 tokens/s
+D1  Energy per token:          0.3938 J/token
+                               393.77 J/1K tokens
+D2  Throughput:                809.47 tokens/s
 D3  Power efficiency:          N/A (need --flops)
-D4  Memory bandwidth util:     551.4%
+D4  Memory bandwidth util:     88.1%
 
 ============================================================
 ADDITIONAL CONTEXT
 ============================================================
-Idle power:                    61.79 W
-Active energy:                 0.00 J (0.000000 kWh)
-Total requests:                2,127
-Successful requests:           2,127
-Average latency:               2.259 s
+Idle power:                    62.13 W
+Active energy:                 161660.99 J (0.044906 kWh)
+Total requests:                2,151
+Successful requests:           2,151
+Average latency:               2.236 s
 GPU memory total:              80.00 GB
 
 ============================================================
